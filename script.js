@@ -38,7 +38,9 @@ function numAddComma(num){
 
 //Dates
 document.getElementById("year").innerHTML = new Date().getFullYear();
-document.getElementById("todayDate").innerHTML = " ("+new Date().toLocaleDateString()+")"
+document.getElementById("todayDate").innerHTML = " ("+new Date().toLocaleDateString()+")";
+
+
 
 ////////////////////////////////
 //method 1 using XMLHttpRequest
@@ -70,7 +72,33 @@ function testAjax(){
         document.getElementById("totalCases").innerHTML = numAddComma(data["cases"]);
         document.getElementById("totalDeaths").innerHTML = numAddComma(data["deaths"]);
         document.getElementById("totalRecovered").innerHTML = numAddComma(data["recovered"]);
-            getData(apiCountryLink+data["countryInfo"].iso3).then(data => { 
+            getData(apiCountryLink+data["countryInfo"].iso3).then(data => {
+                //Start map setup
+                let zoom = 0;
+                let areaCharLength = data["area"].toString().length;
+                if(areaCharLength <= 4 ){
+                    zoom = 7;
+                }
+                else if(areaCharLength > 4 && areaCharLength <= 6){
+                    zoom = 4;
+                }
+                else if(areaCharLength > 6){
+                    zoom = 2;
+                }
+                document.getElementById("mapShow").innerHTML = "<div id='pushMap' style='width: 100%; height: 100%;'>";
+                var myMap = L.map('pushMap').setView([data["latlng"][0], data["latlng"][1]], zoom);
+                myMap.scrollWheelZoom.disable();   
+                L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+                    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+                    maxZoom: 18,
+                    id: 'mapbox/streets-v11',
+                    tileSize: 512,
+                    zoomOffset: -1,
+                    accessToken: 'pk.eyJ1IjoiZGF5YXR4aWlpIiwiYSI6ImNrcDNjYXNhZzAxM2YydnFlbWhhbHJ1MXQifQ.UmhUa0ezG3CDVhUbJk7JtA'
+                }).addTo(myMap);
+                //End map setup
+                document.getElementById("latitude").innerHTML = data["latlng"][0];
+                document.getElementById("longitude").innerHTML = data["latlng"][1];
                 document.getElementById("flag").src = data["flag"];
                 document.getElementById("countryName").innerHTML = data["name"];
                 document.getElementById("altCountryName").innerHTML = " ("+data["altSpellings"][0]+")";
@@ -79,7 +107,8 @@ function testAjax(){
                 document.getElementById("subRegionName").innerHTML = data["subregion"];
                 //border check
                 data["borders"][0] != undefined ? document.getElementById("borders").innerHTML = data["borders"] : document.getElementById("borders").innerHTML = "No Nearby Borders";
-                document.getElementById("areaSize").innerHTML = numAddComma(data["area"])+" km&#178";
+                //area check
+                data["area"] != null ? document.getElementById("areaSize").innerHTML = numAddComma(data["area"])+" km&#178" : document.getElementById("areaSize").innerHTML = "Not Available";
                 document.getElementById("timeZone").innerHTML = data["timezones"];
                 //association Group Check
                 if(data["regionalBlocs"][0] != undefined){
@@ -99,9 +128,7 @@ function testAjax(){
             })
     }).catch(error => {
         document.getElementById("errorMessage").innerHTML = error;
-    })
-
-    
+    })    
 }
 
 /////////////////////////
