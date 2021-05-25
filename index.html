@@ -24,10 +24,11 @@
                 <p id="errorMessage"></p>
             </div>
             <div class="p-5 mb-4 bg-light rounded-3">
-                <p class="h3 fw-bold">Covid Status <span id="todayDate"></span></p>
+                <p class="h3 fw-bold">Covid-19 Status <span id="todayDate"></span></p>
                 <p class="lead fs-6">Total Cases: <span id="totalCases"></span></p>
                 <p class="lead fs-6">Total Deaths: <span id="totalDeaths"></span></p>
                 <p class="lead fs-6">Total Recovered: <span id="totalRecovered"></span></p>
+                <p class="lead fs-6">Total Vaccinated: <span id="totalVaccinated"></span></p>
             </div>
             <div class="p-5 mb-4 bg-light rounded-3">
                 <p class="h3 fw-bold">Map Coordinates</span></p>
@@ -37,7 +38,7 @@
             </div>
         </div>
         <div class="col-lg-7">
-            <div class="p-5 mb-4 bg-light rounded-3">
+            <div id="info" class="p-5 mb-4 bg-light rounded-3">
                 <h2 class="display-5 fw-bold"><span id="countryName"></span><span id="altCountryName"></span></h2>
                 <p class="lead fs-4">This information updates every 10 minutes</p>
                 <div class="col-4 mb-4">
@@ -50,10 +51,10 @@
                 <p class="lead fs-6">Area: <span id="areaSize"></span></p>
                 <p class="lead fs-6">Borders: <span id="borders"></span></p>
                 <p class="lead fs-6">Timezone: <span id="timeZone"></span></p>
-                <p class="lead fs-6">Association: <span id="associationGroupAcronym"></span><span id="associationGroupName"></span></p>
-                <p class="lead fs-6">Language: <span id="language"></span></p>
+                <p class="lead fs-6">Association: <span id="associationGroup"></span><span id="associationGroup"></span></p>
+                <p class="lead fs-6">Languages: <span id="languages"></span></p>
                 <p class="lead fs-6">Demonym: <span id="demonym"></span></p>
-                <p class="lead fs-6">Currencies: <span id="currencies"></span><span id="currenciesName"></span></p>
+                <p class="lead fs-6">Currencies: <span id="currencies"></span></p>
                 <p class="lead fs-6">TLD: <span id="tld"></span></p>
             </div>
         </div>
@@ -67,6 +68,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js" integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <!-- leaflet js -->
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+<!-- moment js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <!-- main js -->
 <script src="script.js"></script>
 

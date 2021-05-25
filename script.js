@@ -1,6 +1,8 @@
 var country = "Brunei";
 var apiCovidLink = "https://api.caw.sh/v3/covid-19/countries/Brunei";
 var apiCountryLink = "https://restcountries.eu/rest/v2/alpha/";
+var apiVaccinatedCountryLink = "https://api.caw.sh/v3/covid-19/vaccine/coverage/countries/brn?lastdays=1&fullData=false";
+var totalPopulation = 0;
 const emptyText = "Please insert country name";
 
 //initial data onload
@@ -32,13 +34,17 @@ function timer(){
     }
 }
 
+function getPercentage(totalVaccinated, totalPopulation){
+    return (100 * totalVaccinated / totalPopulation).toFixed(2);
+}
+
 function numAddComma(num){
     return num.toLocaleString();
 }
 
 //Dates
 document.getElementById("year").innerHTML = new Date().getFullYear();
-document.getElementById("todayDate").innerHTML = " ("+new Date().toLocaleDateString()+")";
+document.getElementById("todayDate").innerHTML = moment(new Date).format("(DD/MM/YYYY)");
 
 
 
@@ -67,68 +73,88 @@ function testAjax(){
     };
 
     getData(apiCovidLink).then(data => {
+        totalPopulation = data["population"];
         
-        document.getElementById("totalPopulation").innerHTML = numAddComma(data["population"]);        
+        ////Covid info
+        document.getElementById("totalPopulation").innerHTML = numAddComma(data["population"]);      
         document.getElementById("totalCases").innerHTML = numAddComma(data["cases"]);
         document.getElementById("totalDeaths").innerHTML = numAddComma(data["deaths"]);
         document.getElementById("totalRecovered").innerHTML = numAddComma(data["recovered"]);
-            getData(apiCountryLink+data["countryInfo"].iso3).then(data => {
-                //Start map setup
-                let zoom = 0;
-                let areaCharLength = data["area"].toString().length;
-                if(areaCharLength <= 4 ){
-                    zoom = 7;
+        
+        ////Country info
+        getData(apiCountryLink+data["countryInfo"].iso3).then(data => {
+            //Set Textfield empty
+            document.getElementById("currencies").textContent = "";
+            document.getElementById("languages").textContent = "";
+            document.getElementById("associationGroup").textContent = "";
+            //Start map setup
+            let zoom = 0;
+            let areaCharLength = data["area"].toString().length;
+            if(areaCharLength <= 4 ){
+                zoom = 7;
+            }
+            else if(areaCharLength == 5){
+                zoom = 5;
+            }
+            else if(areaCharLength > 4 && areaCharLength <= 6){
+                zoom = 4;
+            }
+            else if(areaCharLength > 6){
+                zoom = 2;
+            }
+            document.getElementById("mapShow").innerHTML = "<div id='pushMap' style='width: 100%; height: 100%;'>";
+            var myMap = L.map('pushMap').setView([data["latlng"][0], data["latlng"][1]], zoom);
+            myMap.scrollWheelZoom.disable();   
+            L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+                attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+                maxZoom: 18,
+                id: 'mapbox/streets-v11',
+                tileSize: 512,
+                zoomOffset: -1,
+                accessToken: 'pk.eyJ1IjoiZGF5YXR4aWlpIiwiYSI6ImNrcDNjYXNhZzAxM2YydnFlbWhhbHJ1MXQifQ.UmhUa0ezG3CDVhUbJk7JtA'
+            }).addTo(myMap);
+            //End map setup
+            document.getElementById("latitude").innerHTML = data["latlng"][0];
+            document.getElementById("longitude").innerHTML = data["latlng"][1];
+            document.getElementById("flag").src = data["flag"];
+            document.getElementById("countryName").innerHTML = data["name"];
+            document.getElementById("altCountryName").innerHTML = " ("+data["altSpellings"][0]+")";
+            document.getElementById("capitalName").innerHTML = data["capital"];
+            document.getElementById("regionName").innerHTML = data["region"];
+            document.getElementById("subRegionName").innerHTML = data["subregion"];
+            //border check
+            data["borders"][0] != undefined ? document.getElementById("borders").innerHTML = data["borders"] : document.getElementById("borders").innerHTML = "No Nearby Borders";
+            //area check
+            data["area"] != null ? document.getElementById("areaSize").innerHTML = numAddComma(data["area"])+" km&#178" : document.getElementById("areaSize").innerHTML = "Not Available";
+            document.getElementById("timeZone").innerHTML = data["timezones"];
+            //association Group Check
+            if(data["regionalBlocs"][0] != undefined){
+                for(var i = 0; i < data["regionalBlocs"].length; i++){
+                    document.getElementById("associationGroup").innerHTML += data["regionalBlocs"][i].name + " ("+data["regionalBlocs"][i].acronym+")" + (i === data["regionalBlocs"].length - 1 ? "" : ", ");
                 }
-                else if(areaCharLength == 5){
-                    zoom = 5;
+            }
+            else{
+                document.getElementById("associationGroup").innerHTML = "Not Found";
+            }
+            //languages
+            for(var i = 0; i < data["languages"].length; i++){
+                document.getElementById("languages").textContent += data["languages"][i].name + (i === data["languages"].length - 1 ? "" : ", ");
+            }
+            document.getElementById("demonym").innerHTML = data["demonym"];
+            //currencies
+            for(var i = 0; i < data["currencies"].length; i++){
+                document.getElementById("currencies").textContent += data["currencies"][i].name + " (" + data["currencies"][i].code + ")" + (i === data["currencies"].length - 1 ? "" : ", ");
+            }
+            document.getElementById("tld").innerHTML = data["topLevelDomain"].toString().toUpperCase();
+            
+            ////Total vaccinated info
+            getData("https://api.caw.sh/v3/covid-19/vaccine/coverage/countries/"+data["alpha3Code"]+"?lastdays=1&fullData=false").then(data => {
+                for(var key in data["timeline"]) {
+                    var value = data["timeline"][key];
+                    document.getElementById("totalVaccinated").textContent = numAddComma(value) + " ("+getPercentage(value, totalPopulation)+"%)";
                 }
-                else if(areaCharLength > 4 && areaCharLength <= 6){
-                    zoom = 4;
-                }
-                else if(areaCharLength > 6){
-                    zoom = 2;
-                }
-                document.getElementById("mapShow").innerHTML = "<div id='pushMap' style='width: 100%; height: 100%;'>";
-                var myMap = L.map('pushMap').setView([data["latlng"][0], data["latlng"][1]], zoom);
-                myMap.scrollWheelZoom.disable();   
-                L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
-                    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-                    maxZoom: 18,
-                    id: 'mapbox/streets-v11',
-                    tileSize: 512,
-                    zoomOffset: -1,
-                    accessToken: 'pk.eyJ1IjoiZGF5YXR4aWlpIiwiYSI6ImNrcDNjYXNhZzAxM2YydnFlbWhhbHJ1MXQifQ.UmhUa0ezG3CDVhUbJk7JtA'
-                }).addTo(myMap);
-                //End map setup
-                document.getElementById("latitude").innerHTML = data["latlng"][0];
-                document.getElementById("longitude").innerHTML = data["latlng"][1];
-                document.getElementById("flag").src = data["flag"];
-                document.getElementById("countryName").innerHTML = data["name"];
-                document.getElementById("altCountryName").innerHTML = " ("+data["altSpellings"][0]+")";
-                document.getElementById("capitalName").innerHTML = data["capital"];
-                document.getElementById("regionName").innerHTML = data["region"];
-                document.getElementById("subRegionName").innerHTML = data["subregion"];
-                //border check
-                data["borders"][0] != undefined ? document.getElementById("borders").innerHTML = data["borders"] : document.getElementById("borders").innerHTML = "No Nearby Borders";
-                //area check
-                data["area"] != null ? document.getElementById("areaSize").innerHTML = numAddComma(data["area"])+" km&#178" : document.getElementById("areaSize").innerHTML = "Not Available";
-                document.getElementById("timeZone").innerHTML = data["timezones"];
-                //association Group Check
-                if(data["regionalBlocs"][0] != undefined){
-                    document.getElementById("associationGroupAcronym").innerHTML = data["regionalBlocs"][0].acronym;
-                    document.getElementById("associationGroupName").innerHTML = " ("+data["regionalBlocs"][0].name+")";
-                }
-                else{
-                    document.getElementById("associationGroupAcronym").innerHTML = "Not Defined";
-                    document.getElementById("associationGroupName").innerHTML = "";
-                }
-                document.getElementById("language").innerHTML = data["languages"][0].name;
-                document.getElementById("demonym").innerHTML = data["demonym"];
-                document.getElementById("currencies").innerHTML = data["currencies"][0].code;
-                document.getElementById("currenciesName").innerHTML = " ("+data["currencies"][0].name+")";
-                document.getElementById("tld").innerHTML = data["topLevelDomain"].toString().toUpperCase();
-                console.log(data);
             })
+        })
     }).catch(error => {
         document.getElementById("errorMessage").innerHTML = error;
     })    
