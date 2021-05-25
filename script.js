@@ -79,6 +79,9 @@ function testAjax(){
                 if(areaCharLength <= 4 ){
                     zoom = 7;
                 }
+                else if(areaCharLength == 5){
+                    zoom = 5;
+                }
                 else if(areaCharLength > 4 && areaCharLength <= 6){
                     zoom = 4;
                 }
