@@ -5,6 +5,15 @@ var apiVaccinatedCountryLink = "https://api.caw.sh/v3/covid-19/vaccine/coverage/
 var totalPopulation = 0;
 const emptyText = "Please insert country name";
 
+//
+const ptr = PullToRefresh.init({
+    mainElement: 'body',
+    onRefresh() {
+      window.location.reload();
+    }
+  });
+  
+
 //initial data onload
 testAjax();
 
