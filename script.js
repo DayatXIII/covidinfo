@@ -56,7 +56,6 @@ document.getElementById("year").innerHTML = new Date().getFullYear();
 document.getElementById("todayDate").innerHTML = moment(new Date).format("(DD/MM/YYYY)");
 
 
-
 ////////////////////////////////
 //method 1 using XMLHttpRequest
 ////////////////////////////////
@@ -98,18 +97,23 @@ function testAjax(){
             document.getElementById("associationGroup").textContent = "";
             //Start map setup
             let zoom = 0;
-            let areaCharLength = data["area"].toString().length;
-            if(areaCharLength <= 4 ){
-                zoom = 7;
+            if (data["area"] != null) {
+                let areaCharLength = data["area"].toString().length;
+                if(areaCharLength <= 4 ){
+                    zoom = 7;
+                }
+                else if(areaCharLength == 5){
+                    zoom = 5;
+                }
+                else if(areaCharLength > 4 && areaCharLength <= 6){
+                    zoom = 4;
+                }
+                else if(areaCharLength > 6){
+                    zoom = 2;
+                }                
             }
-            else if(areaCharLength == 5){
-                zoom = 5;
-            }
-            else if(areaCharLength > 4 && areaCharLength <= 6){
-                zoom = 4;
-            }
-            else if(areaCharLength > 6){
-                zoom = 2;
+            else {
+                zoom = 10;
             }
             document.getElementById("mapShow").innerHTML = "<div id='pushMap' style='width: 100%; height: 100%;'>";
             var myMap = L.map('pushMap').setView([data["latlng"][0], data["latlng"][1]], zoom);
